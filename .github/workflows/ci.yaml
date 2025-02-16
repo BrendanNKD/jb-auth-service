@@ -49,10 +49,14 @@ jobs:
         continue-on-error: true  # Prevents workflow failure if secrets are found
 
       # --- SNYK AUTHENTICATION & SCAN ---
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
       - name: Authenticate Snyk
         run: snyk auth $SNYK_TOKEN
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
 
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/golang@master
