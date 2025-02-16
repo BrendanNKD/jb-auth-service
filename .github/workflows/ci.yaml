@@ -80,7 +80,7 @@ jobs:
       - name: Health Check
         run: |
           echo "Checking service health..."
-          curl --fail http://localhost:${{ env.APP_PORT }}/health || (echo "Health check failed!" && exit 1)
+          curl --fail http://localhost:${{ secrets.APP_PORT }}/health || (echo "Health check failed!" && exit 1)
 
       - name: Cleanup Build Directory
         if: ${{ success() }}
