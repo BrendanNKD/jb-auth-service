@@ -48,6 +48,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true  # Prevents workflow failure if secrets are found
 
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/golang@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --sarif-file-output=snyk.sarif
+
+      # --- UPLOAD SARIF RESULTS TO GITHUB SECURITY ---
+      - name: Upload Snyk results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+
       # --- UNIT TESTING & BUILD ---
       - name: Run Unit Tests
         run: go test ./... -cover -v
@@ -75,13 +89,6 @@ jobs:
         run: env | grep POSTGRES
 
       - name: Start Backend Service
-        env:
-          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
-          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          APP_PORT: ${{ secrets.APP_PORT }}
         run: |
           echo "Starting the backend service..."
           ./backend &
@@ -90,7 +97,7 @@ jobs:
       - name: Health Check
         run: |
           echo "Checking service health..."
-          curl --fail http://localhost:8080/health || (echo "Health check failed!" && exit 1)
+          curl --fail http://localhost:${{ env.APP_PORT }}/health || (echo "Health check failed!" && exit 1)
 
       - name: Cleanup Build Directory
         if: ${{ success() }}
