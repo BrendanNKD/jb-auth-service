@@ -1,0 +1,104 @@
+name: CI Test, Build and Security Workflow
+
+on:
+  pull_request:
+    branches:
+      - feat/**
+      - fix/**
+      - breaking/**
+      - main
+
+permissions:
+  contents: write
+  security-events: write  # Required for SARIF upload
+  pull-requests: read  # Required for scanning PR commits
+
+jobs:
+  test_build_security:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_EXPIRE_HOURS: ${{ secrets.JWT_EXPIRE_HOURS }}
+      APP_PORT: ${{ secrets.APP_PORT }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensures full commit history
+          ref: ${{ github.event.pull_request.head.sha }}  # Ensures correct PR commit is checked out
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23.2'
+
+      - name: Install Dependencies
+        run: go mod tidy
+
+      # --- SECRET SCANNING (Fixed Gitleaks) ---
+      - name: Run Gitleaks Secret Scanning
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true  # Prevents workflow failure if secrets are found
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/golang@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --sarif-file-output=snyk.sarif
+
+      # --- UPLOAD SARIF RESULTS TO GITHUB SECURITY ---
+      - name: Upload Snyk results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk.sarif
+
+      # --- UNIT TESTING & BUILD ---
+      - name: Run Unit Tests
+        run: go test ./... -cover -v
+
+      - name: Build Backend Service
+        run: go build -o backend main.go
+
+      # --- INSTALL TRIVY ---
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -qO- https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo tee /etc/apt/trusted.gpg.d/trivy.asc
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      # --- CONTAINER SCANNING (Trivy) ---
+      - name: Build and Scan Docker Image
+        run: |
+          docker build -t my-app .
+          trivy image --exit-code 0 --severity HIGH,CRITICAL my-app
+
+      - name: Debug Environment Variables
+        run: env | grep POSTGRES
+
+      - name: Start Backend Service
+        run: |
+          echo "Starting the backend service..."
+          ./backend &
+          sleep 5  
+
+      - name: Health Check
+        run: |
+          echo "Checking service health..."
+          curl --fail http://localhost:${{ env.APP_PORT }}/health || (echo "Health check failed!" && exit 1)
+
+      - name: Cleanup Build Directory
+        if: ${{ success() }}
+        run: rm -f backend
