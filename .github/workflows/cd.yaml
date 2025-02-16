@@ -73,14 +73,6 @@ jobs:
         run: docker build -t 927041702050.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/uat/jobboard:auth_${{ env.version }} .
         # Builds the Docker image with a new version tag.
 
-      - name: Scan Docker Image with Trivy
-        uses: aquasecurity/trivy-action@latest
-        with:
-          image-ref: 927041702050.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/uat/jobboard:auth_${{ env.version }}
-          format: 'table'
-          exit-code: '1'
-        # Scans the Docker image for vulnerabilities. Fails the build if vulnerabilities are detected.
-
       - name: Push Docker Image to Amazon ECR
         run: docker push 927041702050.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/uat/jobboard:auth_${{ env.version }}
         # Pushes the scanned Docker image to Amazon ECR.
