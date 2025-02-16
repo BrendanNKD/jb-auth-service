@@ -55,6 +55,16 @@ jobs:
       - name: Build Backend Service
         run: go build -o backend main.go
 
+      # --- INSTALL TRIVY ---
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -qO- https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo tee /etc/apt/trusted.gpg.d/trivy.asc
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
       # --- CONTAINER SCANNING (Trivy) ---
       - name: Build and Scan Docker Image
         run: |
