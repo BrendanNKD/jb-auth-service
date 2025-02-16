@@ -62,7 +62,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk.sarif
-        continue-on-error: true  # Avoids failure if permissions are missing
+        continue-on-error: true  # Avoids failure if permissions are missingg
 
       # --- UNIT TESTING & BUILD ---
       - name: Run Unit Tests
