@@ -61,7 +61,9 @@ func main() {
 
 	// Read the APP_ENV environment variable; default to "dev" if not set.
 	appEnv := os.Getenv("APP_ENV")
-
+	if appEnv == "" {
+		appEnv = "dev"
+	}
 	log.Println("Environment:", appEnv)
 
 	// In production, retrieve secrets from the secret manager.
@@ -77,7 +79,9 @@ func main() {
 
 	// Set the server port (default to 8080 if not provided).
 	port := os.Getenv("APP_PORT")
-
+	if port == "" {
+		port = "8080"
+	}
 	log.Printf("Starting server on port %s in %s environment", port, appEnv)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
