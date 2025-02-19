@@ -16,14 +16,25 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-// jwtSecret is read from the environment variable "JWT_SECRET".
-var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
+// getJwtSecret retrieves the JWT secret directly from the environment.
+func getJwtSecret() ([]byte, error) {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return nil, fmt.Errorf("JWT_SECRET environment variable is not set")
+	}
+	return []byte(secret), nil
+}
 
 // GenerateToken creates a JWT for the given username and role.
 func GenerateToken(username, role string) (string, error) {
+	jwtSecret, err := getJwtSecret()
+	if err != nil {
+		return "", err
+	}
+
 	now := time.Now()
 	expirationTime := now.Add(time.Hour * time.Duration(getJwtExpireHours()))
-	issuer := os.Getenv("JWT_ISSUER") // e.g., "your-app-name" or domain name
+	issuer := os.Getenv("JWT_ISSUER") // Optionally set via an environment variable
 
 	claims := Claims{
 		Username: username,
@@ -43,16 +54,20 @@ func GenerateToken(username, role string) (string, error) {
 
 // ValidateToken validates a token and returns its claims, a boolean indicating expiration, and an error if any.
 func ValidateToken(tokenStr string) (*Claims, bool, error) {
+	jwtSecret, err := getJwtSecret()
+	if err != nil {
+		return nil, false, err
+	}
+
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
 
 	if err != nil {
-		// If the error is a ValidationError, check if it is due to expiration.
+		// Check if the error is due to expiration.
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				// Token is expired; return the claims, mark expired as true, and an appropriate error.
 				return claims, true, fmt.Errorf("token is expired")
 			}
 		}
@@ -69,7 +84,7 @@ func ValidateToken(tokenStr string) (*Claims, bool, error) {
 func getJwtExpireHours() int {
 	expHoursStr := os.Getenv("JWT_EXPIRE_HOURS")
 	if expHoursStr == "" {
-		return 72 // default
+		return 72 // default expiration hours
 	}
 	expHours, err := strconv.Atoi(expHoursStr)
 	if err != nil {
