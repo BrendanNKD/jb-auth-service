@@ -85,9 +85,6 @@ jobs:
           docker build -t my-app .
           trivy image --exit-code 0 --severity HIGH,CRITICAL my-app
 
-      - name: Debug Environment Variables
-        run: env | grep POSTGRES
-
       - name: Start Backend Service
         run: |
           echo "Starting the backend service..."
