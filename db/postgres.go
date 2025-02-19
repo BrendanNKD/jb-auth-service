@@ -25,12 +25,6 @@ func Connect() {
 	password := os.Getenv("POSTGRES_PASSWORD")
 	dbname := os.Getenv("POSTGRES_DB")
 
-	// Check that all required values are present.
-	if host == "" || port == "" || user == "" || password == "" || dbname == "" {
-		log.Fatalf("Missing required database configuration: host=%q, port=%q, user=%q, password=%q, dbname=%q",
-			host, port, user, password, dbname)
-	}
-
 	var connStr string
 	// Use different connection string formats depending on the environment.
 	if appEnv == "dev" {
