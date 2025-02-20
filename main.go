@@ -48,8 +48,6 @@ func loadProdSecrets() {
 	portStr := fmt.Sprintf("%v", pgSecrets["port"])
 	os.Setenv("DB_PORT", portStr)
 	os.Setenv("DB_INSTANCE_IDENTIFIER", pgSecrets["dbInstanceIdentifier"].(string))
-	log.Printf("DB_USERNAME_TEST_SECRET")
-	log.Printf("%s", pgSecrets["username"].(string))
 }
 
 func main() {
@@ -57,7 +55,6 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found; using system environment variables")
 	}
-	log.Println(os.Getenv("DB_USERNAME"))
 
 	// Read the APP_ENV environment variable; default to "dev" if not set.
 	appEnv := os.Getenv("APP_ENV")
