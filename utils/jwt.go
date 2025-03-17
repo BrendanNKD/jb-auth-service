@@ -12,7 +12,6 @@ import (
 // Claims defines the custom JWT claims, including a Role field.
 type Claims struct {
 	Username string `json:"username"`
-	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -38,7 +37,6 @@ func GenerateToken(username, role string) (string, error) {
 
 	claims := Claims{
 		Username: username,
-		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(now),

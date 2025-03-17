@@ -79,7 +79,7 @@ jobs:
 
       - name: Get Current Task Definition JSON
         run: |
-          aws ecs describe-task-definition --task-definition ecs-uat-auth-td \
+          aws ecs describe-task-definition --task-definition ecs-uat-auth-service-td \
             --query 'taskDefinition' > current-task-definition.json
         # Retrieves the current ECS task definition.
 

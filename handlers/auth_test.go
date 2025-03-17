@@ -40,7 +40,7 @@ func TestRegisterHandler(t *testing.T) {
 		WithArgs("testuser", sqlmock.AnyArg(), "job_seeker").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	user := models.User{Username: "testuser", Password: "password", Role: "job_seeker"}
+	user := models.Users{Username: "testuser", Password: "password"}
 	body, err := json.Marshal(user)
 	assert.NoError(t, err)
 
@@ -64,7 +64,7 @@ func TestRegisterHandler_InvalidJSON(t *testing.T) {
 
 // Missing username.
 func TestRegisterHandler_MissingUsername(t *testing.T) {
-	user := models.User{Password: "password", Role: "job_seeker"}
+	user := models.Users{Password: "password"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/register", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -76,7 +76,7 @@ func TestRegisterHandler_MissingUsername(t *testing.T) {
 
 // Missing password.
 func TestRegisterHandler_MissingPassword(t *testing.T) {
-	user := models.User{Username: "testuser", Role: "job_seeker"}
+	user := models.Users{Username: "testuser"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/register", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -88,7 +88,7 @@ func TestRegisterHandler_MissingPassword(t *testing.T) {
 
 // Missing role.
 func TestRegisterHandler_MissingRole(t *testing.T) {
-	user := models.User{Username: "testuser", Password: "password"}
+	user := models.Users{Username: "testuser", Password: "password"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/register", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -100,7 +100,7 @@ func TestRegisterHandler_MissingRole(t *testing.T) {
 
 // Invalid role.
 func TestRegisterHandler_InvalidRole(t *testing.T) {
-	user := models.User{Username: "testuser", Password: "password", Role: "invalid_role"}
+	user := models.Users{Username: "testuser", Password: "password"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/register", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -119,7 +119,7 @@ func TestRegisterHandler_DBError(t *testing.T) {
 		WithArgs("testuser", sqlmock.AnyArg(), "job_seeker").
 		WillReturnError(sql.ErrConnDone) // simulate connection error
 
-	user := models.User{Username: "testuser", Password: "password", Role: "job_seeker"}
+	user := models.Users{Username: "testuser", Password: "password"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/register", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -146,7 +146,7 @@ func TestLoginHandler(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"password", "role"}).
 			AddRow(string(hashedPassword), "job_seeker"))
 
-	user := models.User{Username: "testuser", Password: "password"}
+	user := models.Users{Username: "testuser", Password: "password"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/login", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -168,7 +168,7 @@ func TestLoginHandler_InvalidJSON(t *testing.T) {
 
 // Missing username in login.
 func TestLoginHandler_MissingUsername(t *testing.T) {
-	user := models.User{Password: "password"}
+	user := models.Users{Password: "password"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/login", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -180,7 +180,7 @@ func TestLoginHandler_MissingUsername(t *testing.T) {
 
 // Missing password in login.
 func TestLoginHandler_MissingPassword(t *testing.T) {
-	user := models.User{Username: "testuser"}
+	user := models.Users{Username: "testuser"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/login", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -199,7 +199,7 @@ func TestLoginHandler_UserNotFound(t *testing.T) {
 		WithArgs("testuser").
 		WillReturnError(sql.ErrNoRows)
 
-	user := models.User{Username: "testuser", Password: "password"}
+	user := models.Users{Username: "testuser", Password: "password"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/login", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -218,7 +218,7 @@ func TestLoginHandler_DBError(t *testing.T) {
 		WithArgs("testuser").
 		WillReturnError(sql.ErrConnDone)
 
-	user := models.User{Username: "testuser", Password: "password"}
+	user := models.Users{Username: "testuser", Password: "password"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/login", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -241,7 +241,7 @@ func TestLoginHandler_WrongPassword(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"password", "role"}).
 			AddRow(string(hashedPassword), "job_seeker"))
 
-	user := models.User{Username: "testuser", Password: "password"}
+	user := models.Users{Username: "testuser", Password: "password"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/login", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
