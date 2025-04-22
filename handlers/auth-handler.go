@@ -39,8 +39,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert the new user into the database.
-	_, err = db.DB.Exec("INSERT INTO users (username, password) VALUES ($1, $2)",
-		user.Username, string(hashedPassword))
+	_, err = db.DB.Exec("INSERT INTO users (username, password, role) VALUES ($1, $2, $3)",
+		user.Username, string(hashedPassword), user.Role)
 	if err != nil {
 		log.Printf("Error inserting user into database: %v", err)
 		http.Error(w, "User already exists or database error", http.StatusConflict)
@@ -131,6 +131,7 @@ func AuthenticateHandler(w http.ResponseWriter, r *http.Request) {
 		"valid":    true,
 		"message":  "Token is valid",
 		"username": claims.Username,
+		"role":     claims.Role,
 	})
 }
 
