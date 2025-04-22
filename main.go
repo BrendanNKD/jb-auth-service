@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/handlers"
 	"github.com/joho/godotenv"
 )
 
@@ -74,11 +75,18 @@ func main() {
 	// Setup routes.
 	router := routes.SetupRoutes()
 
+	// wrap it in CORS (allow * origin, common methods & headers)
+	corsOpts := []handlers.CORSOption{
+		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+	}
+	handler := handlers.CORS(corsOpts...)(router)
+
 	// Set the server port (default to 8080 if not provided).
 	port := os.Getenv("APP_PORT")
 	if port == "" {
 		port = "8080"
 	}
 	log.Printf("Starting server on port %s in %s environment", port, appEnv)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }

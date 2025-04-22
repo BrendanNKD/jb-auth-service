@@ -13,6 +13,6 @@ func SetupRoutes() *mux.Router {
 	router.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
 	router.HandleFunc("/logout", handlers.LogoutHandler).Methods("POST")
 	router.HandleFunc("/authenticate", handlers.AuthenticateHandler).Methods("GET")
-	router.HandleFunc("/health", handlers.HealthHandler)
+	router.HandleFunc("/health", handlers.HealthHandler).Methods("GET")
 	return router
 }
