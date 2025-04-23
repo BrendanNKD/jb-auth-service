@@ -40,7 +40,7 @@ func TestRegisterHandler(t *testing.T) {
 		WithArgs("testuser", sqlmock.AnyArg(), "job_seeker").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	user := models.Users{Username: "testuser", Password: "password"}
+	user := models.Users{Username: "testuser", Password: "password", Role: "job_seeker"}
 	body, err := json.Marshal(user)
 	assert.NoError(t, err)
 
@@ -88,7 +88,7 @@ func TestRegisterHandler_MissingPassword(t *testing.T) {
 
 // Missing role.
 func TestRegisterHandler_MissingRole(t *testing.T) {
-	user := models.Users{Username: "testuser", Password: "password"}
+	user := models.Users{Username: "testuser", Password: "password", Role: "invalid"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/register", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
