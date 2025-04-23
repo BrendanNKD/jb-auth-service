@@ -87,20 +87,20 @@ func TestRegisterHandler_MissingPassword(t *testing.T) {
 }
 
 // Missing role.
-// func TestRegisterHandler_MissingRole(t *testing.T) {
-// 	user := models.Users{Username: "testuser", Password: "password", Role: "invalid"}
-// 	body, _ := json.Marshal(user)
-// 	req := httptest.NewRequest("POST", "/register", bytes.NewBuffer(body))
-// 	req.Header.Set("Content-Type", "application/json")
-// 	rec := httptest.NewRecorder()
+func TestRegisterHandler_MissingRole(t *testing.T) {
+	user := models.Users{Username: "testuser", Password: "password"}
+	body, _ := json.Marshal(user)
+	req := httptest.NewRequest("POST", "/register", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
 
-// 	handlers.RegisterHandler(rec, req)
-// 	assert.Equal(t, http.StatusBadRequest, rec.Code)
-// }
+	handlers.RegisterHandler(rec, req)
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
 
 // Invalid role.
 func TestRegisterHandler_InvalidRole(t *testing.T) {
-	user := models.Users{Username: "testuser", Password: "password"}
+	user := models.Users{Username: "testuser", Password: "password", Role: "invalid"}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/register", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
