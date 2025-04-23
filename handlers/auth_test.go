@@ -88,7 +88,7 @@ func TestRegisterHandler_MissingPassword(t *testing.T) {
 
 // Missing role.
 func TestRegisterHandler_MissingRole(t *testing.T) {
-	user := models.Users{Username: "testuser", Password: "password"}
+	user := models.Users{Username: "testuser", Password: "password", Role: ""}
 	body, _ := json.Marshal(user)
 	req := httptest.NewRequest("POST", "/register", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
