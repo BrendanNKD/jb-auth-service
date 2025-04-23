@@ -18,7 +18,7 @@ type JSONResponse map[string]interface{}
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var user models.User
+	var user models.Users
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
@@ -27,14 +27,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	// Validate input for username, password, and role
 	if user.Username == "" || user.Password == "" {
 		http.Error(w, "Username and password are required", http.StatusBadRequest)
-		return
-	}
-	if user.Role == "" {
-		http.Error(w, "Role is required", http.StatusBadRequest)
-		return
-	}
-	if user.Role != "employer" && user.Role != "job_seeker" {
-		http.Error(w, "Invalid role. Must be either 'employer' or 'job_seeker'", http.StatusBadRequest)
 		return
 	}
 
@@ -61,7 +53,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var user models.User
+	var user models.Users
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return

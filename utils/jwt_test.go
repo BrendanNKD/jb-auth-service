@@ -33,7 +33,6 @@ func TestValidateToken(t *testing.T) {
 	assert.NoError(t, err)
 	assert.False(t, expired)
 	assert.Equal(t, "testuser", claims.Username)
-	assert.Equal(t, "employer", claims.Role)
 }
 
 func TestExpiredToken(t *testing.T) {
