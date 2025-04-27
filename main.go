@@ -77,11 +77,16 @@ func main() {
 
 	// wrap it in CORS (allow * origin, common methods & headers)
 	corsOpts := []handlers.CORSOption{
-		handlers.AllowedOrigins([]string{"http://localhost:3000",http://uat-jb-listing-service-alb-892159180.ap-southeast-1.elb.amazonaws.com,http://uat-jb-applications-service-alb-11653197.ap-southeast-1.elb.amazonaws.com}), // or your actual frontend origin
+		handlers.AllowedOrigins([]string{
+			"http://localhost:3000",
+			"http://uat-jb-listing-service-alb-892159180.ap-southeast-1.elb.amazonaws.com",
+			"http://uat-jb-applications-service-alb-11653197.ap-southeast-1.elb.amazonaws.com",
+		}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}), // include headers you're using
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
 		handlers.AllowCredentials(),
 	}
+
 
 	handler := handlers.CORS(corsOpts...)(router)
 
