@@ -83,7 +83,6 @@ func main() {
 	router := routes.SetupRoutes()
 	router.Use(handlers.CORS(corsOpts...))
 	router.Use(mux.CORSMethodMiddleware(router))
-	// wrap it in CORS (allow * origin, common methods & headers)
 
 	// Set the server port (default to 8080 if not provided).
 	port := os.Getenv("APP_PORT")
