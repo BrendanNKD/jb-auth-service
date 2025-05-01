@@ -11,7 +11,6 @@ import (
 	"os"
 
 	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
@@ -73,16 +72,18 @@ func main() {
 	// Connect to the database.
 	db.Connect()
 
-	corsOpts := []handlers.CORSOption{
-		handlers.AllowedOrigins([]string{"*"}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
-		handlers.AllowedHeaders([]string{"Content-Type", "Authorization", "X-Requested-With"}),
-	}
-
 	// Setup routes.
 	router := routes.SetupRoutes()
-	router.Use(handlers.CORS(corsOpts...))
-	router.Use(mux.CORSMethodMiddleware(router))
+
+	// define your CORS policy
+	corsOpts := []handlers.CORSOption{
+		handlers.AllowedOrigins([]string{"*"}), // allow all origins
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization", "X-Requested-With"}),
+		handlers.AllowCredentials(), // if you need cookies/auth
+	}
+
+	corsHandler := handlers.CORS(corsOpts...)(router)
 
 	// Set the server port (default to 8080 if not provided).
 	port := os.Getenv("APP_PORT")
@@ -90,5 +91,5 @@ func main() {
 		port = "8080"
 	}
 	log.Printf("Starting server on port %s in %s environment", port, appEnv)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Fatal(http.ListenAndServe(":"+port, corsHandler))
 }
