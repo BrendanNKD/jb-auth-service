@@ -35,12 +35,12 @@ func TestRegisterHandler(t *testing.T) {
 	mock, cleanup := setupMockDB()
 	defer cleanup()
 
-	// Use a valid role "job_seeker" (or "employer")
+	// Use a valid role "jobseeker" (or "employer")
 	mock.ExpectExec("INSERT INTO users").
-		WithArgs("testuser", sqlmock.AnyArg(), "job_seeker").
+		WithArgs("testuser", sqlmock.AnyArg(), "jobseeker").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	user := models.Users{Username: "testuser", Password: "password", Role: "job_seeker"}
+	user := models.Users{Username: "testuser", Password: "password", Role: "jobseeker"}
 	body, err := json.Marshal(user)
 	assert.NoError(t, err)
 
@@ -116,7 +116,7 @@ func TestRegisterHandler_DBError(t *testing.T) {
 	defer cleanup()
 
 	mock.ExpectExec("INSERT INTO users").
-		WithArgs("testuser", sqlmock.AnyArg(), "job_seeker").
+		WithArgs("testuser", sqlmock.AnyArg(), "jobseeker").
 		WillReturnError(sql.ErrConnDone) // simulate connection error
 
 	user := models.Users{Username: "testuser", Password: "password"}
@@ -144,7 +144,7 @@ func TestLoginHandler(t *testing.T) {
 	mock.ExpectQuery(`SELECT password, role FROM users WHERE username = \$1`).
 		WithArgs("testuser").
 		WillReturnRows(sqlmock.NewRows([]string{"password", "role"}).
-			AddRow(string(hashedPassword), "job_seeker"))
+			AddRow(string(hashedPassword), "jobseeker"))
 
 	user := models.Users{Username: "testuser", Password: "password"}
 	body, _ := json.Marshal(user)
@@ -239,7 +239,7 @@ func TestLoginHandler_WrongPassword(t *testing.T) {
 	mock.ExpectQuery(`SELECT password, role FROM users WHERE username = \$1`).
 		WithArgs("testuser").
 		WillReturnRows(sqlmock.NewRows([]string{"password", "role"}).
-			AddRow(string(hashedPassword), "job_seeker"))
+			AddRow(string(hashedPassword), "jobseeker"))
 
 	user := models.Users{Username: "testuser", Password: "password"}
 	body, _ := json.Marshal(user)
