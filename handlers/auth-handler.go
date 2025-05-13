@@ -97,36 +97,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthenticateHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"valid":   false,
-			"message": "No token provided",
-		})
-		return
-	}
-
-	// Unconditionally trim the "Bearer " prefix.
-	authHeader = strings.TrimPrefix(authHeader, "Bearer ")
-
-	claims, isExpired, err := jwt.ValidateToken(authHeader)
-	if err != nil {
-		if isExpired {
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"valid":   false,
-				"message": "Token has expired",
-			})
-			return
-		}
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"valid":   false,
-			"message": "Invalid token",
-		})
-		return
-	}
-
-	// Return valid response
+	claims := r.Context().Value("userClaims").(*utils.Claims)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"valid":    true,
 		"message":  "Token is valid",
