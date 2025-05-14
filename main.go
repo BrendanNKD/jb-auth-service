@@ -75,12 +75,15 @@ func main() {
 	// Setup routes.
 	router := routes.SetupRoutes()
 
-	// wrap it in CORS (allow * origin, common methods & headers)
+	// define your CORS policy
 	corsOpts := []handlers.CORSOption{
-		handlers.AllowedOrigins([]string{"*"}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+		handlers.AllowedOrigins([]string{"*"}), // allow all origins
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization", "X-Requested-With"}),
+		handlers.AllowCredentials(), // if you need cookies/auth
 	}
-	handler := handlers.CORS(corsOpts...)(router)
+
+	corsHandler := handlers.CORS(corsOpts...)(router)
 
 	// Set the server port (default to 8080 if not provided).
 	port := os.Getenv("APP_PORT")
@@ -88,5 +91,5 @@ func main() {
 		port = "8080"
 	}
 	log.Printf("Starting server on port %s in %s environment", port, appEnv)
-	log.Fatal(http.ListenAndServe(":"+port, handler))
+	log.Fatal(http.ListenAndServe(":"+port, corsHandler))
 }
