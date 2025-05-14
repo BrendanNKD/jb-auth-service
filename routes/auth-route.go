@@ -12,9 +12,8 @@ func SetupRoutes() *mux.Router {
 	router.HandleFunc("/register", handlers.RegisterHandler).Methods("POST")
 	router.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
 	router.HandleFunc("/logout", handlers.LogoutHandler).Methods("POST")
-	router.Handle("/admin", middleware.AuthMiddleware(
-		middleware.RoleMiddleware([]string{"admin"})(
-		http.HandlerFunc(handlers.AdminHandler))))
+	router.Handle("/authenticate", middleware.AuthMiddleware(
+			http.HandlerFunc(handlers.AuthenticateHandler)))
 	router.HandleFunc("/health", handlers.HealthHandler).Methods("GET")
 	return router
 }
